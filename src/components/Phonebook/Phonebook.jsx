@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { addContact, deleteContact } from '../../redux/actions';
+import { addContact, deleteContact, setFilter } from '../../redux/actions';
+import { getFilteredContacts } from '../../redux/selectors';
 
 import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
@@ -9,9 +10,10 @@ import FilterInput from './ContactFiltr/ContactFiltr';
 import styles from './phonebook.module.css';
 
 const Phonebook = () => {
-  const contacts = useSelector(store => store.contacts);
+  const contacts = useSelector(getFilteredContacts);
+  // const filter = useSelector(getFilter);
+
   const dispatch = useDispatch();
-  const [filter, setFilter] = useState('');
 
   const isDuplicate = ({ name }) => {
     const normalizedName = name.toLowerCase();
@@ -37,32 +39,16 @@ const Phonebook = () => {
     dispatch(deleteContact(id));
   };
 
-  //   const changeFilter = ({ target }) => setFilter(target.value);
+  //  const items = getFilteredContacts();
 
-  //   const getFilteredContacts = () => {
-  //     if (!filter) {
-  //       return contacts;
-  //     }
-
-  //     const normalizedFilter = filter.toLowerCase();
-
-  //     const filteredContacts = contacts.filter(({ name }) => {
-  //       const normalizedName = name.toLowerCase();
-
-  //       return normalizedName.includes(normalizedFilter);
-  //     });
-
-  //     return filteredContacts;
-  //   };
-
-  //   const items = getFilteredContacts();
+  const changeFilter = ({ target }) => dispatch(setFilter(target.value));
 
   return (
     <div className={styles.wrapper}>
       <h1>Phonebook</h1>
       <ContactForm onSubmit={onAddContact} />
       <h2>Contacts</h2>
-      <FilterInput value={filter} />
+      <FilterInput onChange={changeFilter} />
       <ContactList items={contacts} deleteContact={onDeleteContact} />
     </div>
   );
