@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addContact, deleteContact, setFilter } from '../../redux/actions';
 import { getFilteredContacts } from '../../redux/selectors';
