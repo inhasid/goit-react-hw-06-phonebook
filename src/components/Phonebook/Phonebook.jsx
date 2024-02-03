@@ -1,92 +1,71 @@
-import { useState, useEffect, useRef } from "react";
-import { nanoid } from "nanoid";
+import { useState, useEffect, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { addContact, deleteContact } from '../../redux/actions';
 
-import ContactForm from "./ContactForm/ContactForm";
-import ContactList from "./ContactList/ContactList";
-import FilterInput from "./ContactFiltr/ContactFiltr";
+import ContactForm from './ContactForm/ContactForm';
+import ContactList from './ContactList/ContactList';
+import FilterInput from './ContactFiltr/ContactFiltr';
 
-import styles from "./phonebook.module.css";
+import styles from './phonebook.module.css';
 
 const Phonebook = () => {
-    const [contacts, setContacts] = useState(() => {
-        const data = JSON.parse(localStorage.getItem("Phone-book"));
-        return data || [];
+  const contacts = useSelector(store => store.contacts);
+  const dispatch = useDispatch();
+  const [filter, setFilter] = useState('');
+
+  const isDuplicate = ({ name }) => {
+    const normalizedName = name.toLowerCase();
+
+    const duplicate = contacts.find(item => {
+      const normalizedCurrentName = item.name.toLowerCase();
+      return normalizedName === normalizedCurrentName;
     });
-    const [filter, setFilter] = useState("");
 
-    const firstRender = useRef(true);
+    return Boolean(duplicate);
+  };
 
-    useEffect(() => {
-        if (!firstRender.current) {
-            localStorage.setItem("Phone-book", JSON.stringify(contacts));
-        }
-    }, [contacts]);
-
-    useEffect(() => {
-        firstRender.current = false;
-    }, [])
-
-    const isDuplicate = ({ name }) => {
-        const normalizedName = name.toLowerCase();
-        
-        const duplicate = contacts.find(item => {
-            const normalizedCurrentName = item.name.toLowerCase();
-            return (normalizedName === normalizedCurrentName);
-        })
-
-        return Boolean(duplicate);
+  const onAddContact = data => {
+    if (isDuplicate(data)) {
+      return alert(`${data.name} is already in contacts.`);
     }
 
-    const addContact = (data) => {
-        
-        if(isDuplicate(data)) {
-            return alert(`${data.name} is already in contacts.`);
-        }
+    const action = addContact(data);
+    dispatch(action);
+  };
 
-        setContacts(prevContacts => {
-            const newContact = {
-                id: nanoid(),
-                ...data,
-            };
-        
-            return [...prevContacts, newContact];
+  const onDeleteContact = id => {
+    dispatch(deleteContact(id));
+  };
 
-        })
-    }
+  //   const changeFilter = ({ target }) => setFilter(target.value);
 
-    const deleteContact = (id) => {
-        setContacts(prevContacts => prevContacts.filter(item => item.id !== id));
-    }
+  //   const getFilteredContacts = () => {
+  //     if (!filter) {
+  //       return contacts;
+  //     }
 
-    const changeFilter = ({ target }) => setFilter(target.value);
+  //     const normalizedFilter = filter.toLowerCase();
 
-    const getFilteredContacts = () => {
-        if(!filter) {
-            return contacts;
-        }
+  //     const filteredContacts = contacts.filter(({ name }) => {
+  //       const normalizedName = name.toLowerCase();
 
-        const normalizedFilter = filter.toLowerCase();
+  //       return normalizedName.includes(normalizedFilter);
+  //     });
 
-        const filteredContacts = contacts.filter(({name}) => {
-            const normalizedName = name.toLowerCase();
+  //     return filteredContacts;
+  //   };
 
-            return (normalizedName.includes(normalizedFilter))
-        });
+  //   const items = getFilteredContacts();
 
-        return filteredContacts;
-    }
-
-    const items = getFilteredContacts();
-
-        return (
-            <div className={styles.wrapper}>
-                <h1>Phonebook</h1>
-                <ContactForm onSubmit={addContact} />
-                <h2>Contacts</h2>
-                <FilterInput onChange={changeFilter} value={filter} />
-                <ContactList items={items} deleteContact={deleteContact} />
-            </div>
-        )  
-}
+  return (
+    <div className={styles.wrapper}>
+      <h1>Phonebook</h1>
+      <ContactForm onSubmit={onAddContact} />
+      <h2>Contacts</h2>
+      <FilterInput value={filter} />
+      <ContactList items={contacts} deleteContact={onDeleteContact} />
+    </div>
+  );
+};
 
 export default Phonebook;
