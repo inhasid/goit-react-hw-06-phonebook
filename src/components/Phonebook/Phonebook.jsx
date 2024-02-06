@@ -7,39 +7,26 @@ import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import FilterInput from './ContactFiltr/ContactFiltr';
 
+import { isDuplicate } from './helper';
+
 import styles from './phonebook.module.css';
 
 const Phonebook = () => {
   const contacts = useSelector(getFilteredContacts);
-  // const filter = useSelector(getFilter);
 
   const dispatch = useDispatch();
 
-  const isDuplicate = ({ name }) => {
-    const normalizedName = name.toLowerCase();
-
-    const duplicate = contacts.find(item => {
-      const normalizedCurrentName = item.name.toLowerCase();
-      return normalizedName === normalizedCurrentName;
-    });
-
-    return Boolean(duplicate);
-  };
-
   const onAddContact = data => {
-    if (isDuplicate(data)) {
+    if (isDuplicate(contacts, data)) {
       return alert(`${data.name} is already in contacts.`);
+    } else {
+      dispatch(addContact(data));
     }
-
-    const action = addContact(data);
-    dispatch(action);
   };
 
   const onDeleteContact = id => {
     dispatch(deleteContact(id));
   };
-
-  //  const items = getFilteredContacts();
 
   const changeFilter = ({ target }) => dispatch(setFilter(target.value));
 
