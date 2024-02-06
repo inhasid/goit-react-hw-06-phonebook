@@ -1,52 +1,53 @@
-import { useState } from "react";
-import { nanoid } from "nanoid";
+import React from 'react';
+import { nanoid } from 'nanoid';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from '../../../redux/contacts/contacts-slice';
+import { getFilteredContacts } from '../../../redux/selectors';
 
-import styles from "./contact-form.module.css";
+import styles from './contact-form.module.css';
 
-const INITIAL_STATE = {
-    name: "",
-    number: "",
-};
+const ContactForm = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(getFilteredContacts);
 
-const ContactForm = ({ onSubmit }) => {
-    const [state, setState] = useState({...INITIAL_STATE});
+  const handleSubmit = e => {
+    e.preventDefault();
 
-    const handleChange = ({ target }) => {
-        const { name, value } = target;
-        setState({
-            ...state,
-            [name]: value,
+    const nameInput = e.target.elements.name;
+    const numberInput = e.target.elements.number;
+
+    const normalizedName = nameInput.value.toLowerCase();
+    const isDuplicate = contacts.some(
+      contact => contact.name.toLowerCase() === normalizedName
+    );
+
+    if (isDuplicate) {
+      alert(`${nameInput.value} is already in contacts.`);
+    } else {
+      dispatch(
+        addContact({
+          id: nanoid(),
+          name: nameInput.value,
+          number: numberInput.value,
         })
+      );
+      e.target.reset();
     }
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSubmit({...state});
-        reset();
-    }
-
-    const reset = () => {
-        setState({...INITIAL_STATE});
-    }
-
-    const contactName = nanoid();
-    const contactNumber = nanoid();
-
-    const { name, number } = state;
-
-    return (
-            <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.formGroup}>
-                    <label htmlFor={contactName}>Name</label>
-                    <input value={name} type="text" name="name" required onChange={handleChange} id={contactName} placeholder="Name" />
-                </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor={contactNumber}>Number</label>
-                    <input value={number} type="tel" name="number" required onChange={handleChange} id={contactNumber} placeholder="Number" />
-                </div>
-                <button type="submit">Add contact</button>
-            </form>
-        )
-}
+  return (
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <div className={styles.formGroup}>
+        <label htmlFor="name">Name</label>
+        <input type="text" name="name" required placeholder="Name" />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="number">Number</label>
+        <input type="tel" name="number" required placeholder="Number" />
+      </div>
+      <button type="submit">Add contact</button>
+    </form>
+  );
+};
 
 export default ContactForm;
