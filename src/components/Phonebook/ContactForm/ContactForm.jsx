@@ -1,4 +1,3 @@
-import React from 'react';
 import { nanoid } from 'nanoid';
 import { useDispatch, useSelector } from 'react-redux';
 import { addContact } from '../../../redux/contacts/contacts-slice';
@@ -23,6 +22,7 @@ const ContactForm = () => {
 
     if (isDuplicate) {
       alert(`${nameInput.value} is already in contacts.`);
+      e.target.reset();
     } else {
       dispatch(
         addContact({
@@ -36,7 +36,7 @@ const ContactForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
+    <form id="myForm" onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.formGroup}>
         <label htmlFor="name">Name</label>
         <input type="text" name="name" required placeholder="Name" />
